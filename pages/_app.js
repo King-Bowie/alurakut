@@ -10,7 +10,7 @@ const GlobalStyle = createGlobalStyle`
   }
 
   body {
-    background-color: #15202B;
+    background-image: url("https://i.pinimg.com/originals/7f/d0/35/7fd0358c17dececb4c93586f6c841d9a.jpg");
     font-family:sans-serif;
   }
 
