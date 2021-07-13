@@ -4,7 +4,6 @@ import { AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet 
 import { ProfileRelationsBoxWrapper} from '../src/components/ProfileRelations'
 
 function ProfileSideBar(propriedades) {
-  console.log(propriedades)
   return(
     <Box>
       <img src={`https://github.com/${propriedades.githubUser}.png`} style={{ borderRadius: '8px'}}></img>
@@ -31,6 +30,10 @@ export default function Home() {
         <div className="profileArea" style={{ gridArea: 'profileArea' }}>
           <Box >
             <ProfileSideBar githubUser={usuarioAleatorio}/>
+            <h4>
+              {usuarioAleatorio}
+            </h4>
+
             <AlurakutProfileSidebarMenuDefault/>
             
           </Box>
