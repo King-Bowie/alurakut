@@ -1,6 +1,6 @@
 import styled from "styled-components";
 const Box = styled.div`
-  background: #FFFFFF;
+  background: #dcdcdc;
   border-radius: 8px;
   padding: 16px;
   /* CSS Pré-Pronto */
@@ -54,6 +54,6 @@ const Box = styled.div`
     border-radius: 10000px;
     background-color: #6F92BB;
   }
-`; //sempre em letra maiuscula pq nao é uma tag e sim um componente
+`; 
 
 export default Box;
