@@ -37,7 +37,7 @@ export default function Home() {
         </div>
         <div  className="welcomeArea" style={{ gridArea: 'welcomeArea'}}>
           <Box>
-            Bemvindo(a) 
+            <b>Bemvindo(a) </b>
             <OrkutNostalgicIconSet/>
           </Box>
         </div>
@@ -60,7 +60,7 @@ export default function Home() {
             </ul>
           </ProfileRelationsBoxWrapper>
           <Box >
-            comunidade
+            <b>comunidade</b>
           </Box>
         </div>
       </MainGrid>
