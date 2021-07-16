@@ -1,6 +1,8 @@
 import React from 'react'
 import MainGrid from '../src/components/MainGrid'
 import Box from '../src/components/Box'
+import nookies from 'nookies'
+import jwt from 'jsonwebtoken'
 import { AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet } from '../src/lib/AlurakutCommons'
 import { ProfileRelationsBoxWrapper} from '../src/components/ProfileRelations'
 
@@ -44,24 +46,14 @@ function ProfileRelationsBox(propriedades){
 }
 
 
-export default function Home() {
+export default function Home(props) {
   
-  const usuarioAleatorio = 'King-Bowie';
+  const usuarioAleatorio = props.githubUser;
   const [comunidades, setComunidades] = React.useState([
     {
-      id: '123',
-      title: 'Eu odeio acordar cedo',
-      image: 'https://alurakut.vercel.app/capa-comunidade-01.jpg'
-    },
-    {
-      id: '124',
-      title: 'Sonic Capitalista',
-      image: 'https://pbs.twimg.com/profile_images/1132394574553538560/YYCqjONY.jpg'
-    },
-    {
-      id: '132',
-      title: 'Oh noo!',
-      image: 'https://ogimg.infoglobo.com.br/in/23638624-fd4-52a/FT1086A/filme-sonic.jpg'
+    //   id: '132',
+    //   title: 'Oh noo!',
+    //   image: 'https://ogimg.infoglobo.com.br/in/23638624-fd4-52a/FT1086A/filme-sonic.jpg'
   }]);
   const pessoasFavoritas = [
   'peas',
@@ -73,6 +65,7 @@ export default function Home() {
 ]
 
 const [seguidores, setSeguidores] = React.useState([]);
+// 0 - pegar o array de dados do github
 React.useEffect(function(){
   fetch('https://api.github.com/users/King-Bowie/following')
   .then(function (respostaDoServidor){
@@ -81,6 +74,30 @@ React.useEffect(function(){
   .then(function(respostaCompleta){
     setSeguidores(respostaCompleta);
   })
+  //API GraphQL
+  fetch('https://graphql.datocms.com/', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'a1548e89482962db1dc5ac96cb6482',
+      'Content-type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify({ "query": `query{
+      allCommunities {
+        title
+        imageUrl
+        id
+        creatorSlug
+      }
+    }` })
+  })
+  .then((response) => response.json())
+  .then((respostaCompleta) => {
+    const comunidadesVindasDoDato = respostaCompleta.data.allCommunities;
+    console.log(comunidadesVindasDoDato)
+    setComunidades(comunidadesVindasDoDato)
+  })
+
 }, [])
 
   return( 
@@ -99,16 +116,30 @@ React.useEffect(function(){
               <h2 className="subTitle">O que você deseja fazer?</h2>
               <form onSubmit={function handleCriaComunidade(e) { // esse e é um para evento
                 e.preventDefault();
+
                 const dadosDoFormulario = new FormData(e.target);
+
                   const comunidade = {
-                  id: new Date().toISOString(),
                   title:  dadosDoFormulario.get('title'),
-                  image: dadosDoFormulario.get('image'),
+                  imageUrl: dadosDoFormulario.get('image'),
+                  creatorSlug: usuarioAleatorio,
                 }
 
-                const comunidadesAtualizadas = [...comunidades, comunidade];
-                setComunidades(comunidadesAtualizadas)
-                console.log(comunidadesAtualizadas);
+                fetch('/api/comunidades', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(comunidade)
+                })
+                .then(async(response)=>{
+                  const dados = await response.json();
+                  const comunidadesAtualizadas = [...comunidades, comunidade];
+                  setComunidades(comunidadesAtualizadas);
+                  console.log(comunidadesAtualizadas);
+                })
+
+                
               }}>
                 <div>
                     <input 
@@ -154,8 +185,8 @@ React.useEffect(function(){
             {comunidades.map((itemAtual) => {
               return (
                 <li key={itemAtual.id}>
-                  <a href={`/users/${itemAtual.title}`}>
-                      {<img src={itemAtual.image} />}
+                  <a href={`/comunidades/${itemAtual.id}`}>
+                      {<img src={itemAtual.imageUrl} />}
                       <span>{itemAtual.title}</span>
                   </a>
                 </li>
@@ -168,4 +199,27 @@ React.useEffect(function(){
       </MainGrid>
     </>
   )
+}
+
+
+export async function getServerSideProps(context) {
+  const cookies = nookies.get(context)
+  const token = cookies.USER_TOKEN
+  const decodeToken = jwt.decode(token);
+  const githubUser  = decodeToken?.githubUser;
+  
+  if(!githubUser){
+    return{
+      redirect:{
+        destination: '/login',
+        permanent: false,
+      }
+    }
+  }
+
+  return{
+    props: {
+      githubUser,
+    }
+  }
 }
